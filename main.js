@@ -9,41 +9,43 @@
  *   node main.js --force       既読状態を無視して全件処理（デバッグ用）
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { fetchAllSources } from './src/fetcher.js';
-import { filterRelevantItems } from './src/filter.js';
-import { sendDigestEmail, sendTestEmail } from './src/emailer.js';
-import { loadState, saveState } from './src/state.js';
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import { fetchAllSources } from "./src/fetcher.js";
+import { filterRelevantItems } from "./src/filter.js";
+import { sendDigestEmail, sendTestEmail } from "./src/emailer.js";
+import { loadState, saveState } from "./src/state.js";
 
 // ─── 設定読み込み ─────────────────────────────────────────────────
-const configPath = resolve('./config.json');
+const configPath = resolve("./config.json");
 let config;
 try {
-  config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  config = JSON.parse(readFileSync(configPath, "utf-8"));
 } catch (err) {
-  console.error('❌ config.json の読み込みに失敗しました:', err.message);
+  console.error("❌ config.json の読み込みに失敗しました:", err.message);
   process.exit(1);
 }
 
-const stateFile = resolve(config.state?.file || './data/seen.json');
+const stateFile = resolve(config.state?.file || "./data/seen.json");
 const maxAgeDays = config.state?.maxAge || 90;
 
 // ─── CLI フラグ解析 ───────────────────────────────────────────────
 const args = process.argv.slice(2);
-const isTestEmail = args.includes('--test-email');
-const isForce = args.includes('--force');
+const isTestEmail = args.includes("--test-email");
+const isForce = args.includes("--force");
 
 // ─── メイン処理 ───────────────────────────────────────────────────
 async function main() {
   const startTime = Date.now();
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`厚生労働省モニタリング 開始: ${new Date().toLocaleString('ja-JP')}`);
-  console.log('='.repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
+  console.log(
+    `厚生労働省モニタリング 開始: ${new Date().toLocaleString("ja-JP")}`,
+  );
+  console.log("=".repeat(60));
 
   // テストメール
   if (isTestEmail) {
-    console.log('テストメールを送信します...');
+    console.log("テストメールを送信します...");
     await sendTestEmail(config);
     return;
   }
@@ -52,7 +54,7 @@ async function main() {
   const state = loadState(stateFile);
   console.log(`\n📋 既読アイテム数: ${state.seenIds.size}件`);
   if (state.lastRun) {
-    console.log(`   前回実行: ${state.lastRun.toLocaleString('ja-JP')}`);
+    console.log(`   前回実行: ${state.lastRun.toLocaleString("ja-JP")}`);
   }
 
   // ── 2. RSS取得 ───────────────────────────────────────────────
@@ -63,12 +65,14 @@ async function main() {
   // ── 3. 新着フィルタ ──────────────────────────────────────────
   const newItems = isForce
     ? allItems
-    : allItems.filter(item => !state.seenIds.has(item.id));
+    : allItems.filter((item) => !state.seenIds.has(item.id));
 
-  console.log(`\n🆕 新着アイテム: ${newItems.length}件${isForce ? ' (--force モード)' : ''}`);
+  console.log(
+    `\n🆕 新着アイテム: ${newItems.length}件${isForce ? " (--force モード)" : ""}`,
+  );
 
   if (newItems.length === 0) {
-    console.log('   新着情報はありませんでした。');
+    console.log("   新着情報はありませんでした。");
     updateStateAndExit(state, allItems, stateFile, maxAgeDays, startTime);
     return;
   }
@@ -87,14 +91,14 @@ async function main() {
 
   // ── 6. メール送信 ────────────────────────────────────────────
   if (relevantItems.length === 0) {
-    console.log('\n📭 関連情報なし。メールは送信しません。');
+    console.log("\n📭 関連情報なし。メールは送信しません。");
   } else {
     console.log(`\n📧 メール送信中... (${relevantItems.length}件)`);
     try {
       await sendDigestEmail(relevantItems, config);
-      console.log('   ✅ 送信完了');
+      console.log("   ✅ 送信完了");
     } catch (err) {
-      console.error('   ❌ メール送信失敗:', err.message);
+      console.error("   ❌ メール送信失敗:", err.message);
       // メール失敗でも状態はすでに保存済み
     }
   }
@@ -110,7 +114,7 @@ function updateStateAndExit(state, allItems, stateFile, maxAgeDays, startTime) {
   console.log(`\n✅ 完了 (${elapsed}秒)\n`);
 }
 
-main().catch(err => {
-  console.error('\n❌ 予期しないエラー:', err);
+main().catch((err) => {
+  console.error("\n❌ 予期しないエラー:", err);
   process.exit(1);
 });

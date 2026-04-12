@@ -3,7 +3,7 @@
  * 関連記事のダイジェストメールを送信する
  */
 
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 /**
  * ダイジェストメールを送信
@@ -40,8 +40,8 @@ function buildHtml(items, today) {
       <td style="padding:16px 12px; vertical-align:top;">
         <div style="font-size:11px; color:#6b7280; margin-bottom:4px;">
           ${escHtml(it.source)}
-          ${it.pubDate ? ' · ' + formatDate(it.pubDate) : ''}
-          ${it.aiScore ? ` · 関連度 ${Math.round(it.aiScore * 100)}%` : ''}
+          ${it.pubDate ? " · " + formatDate(it.pubDate) : ""}
+          ${it.aiScore ? ` · 関連度 ${Math.round(it.aiScore * 100)}%` : ""}
         </div>
         <a href="${escHtml(it.link)}" style="font-size:15px; font-weight:600; color:#1d4ed8; text-decoration:none;">
           ${escHtml(it.title)}
@@ -51,17 +51,17 @@ function buildHtml(items, today) {
             ? `<div style="margin-top:8px; font-size:13px; color:#374151; line-height:1.6;">
                 ${escHtml(it.aiSummary)}
                </div>`
-            : ''
+            : ""
         }
         ${
           it.aiReason
             ? `<div style="margin-top:6px; font-size:11px; color:#9ca3af;">📌 ${escHtml(it.aiReason)}</div>`
-            : ''
+            : ""
         }
       </td>
-    </tr>`
+    </tr>`,
     )
-    .join('');
+    .join("");
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -92,33 +92,39 @@ function buildHtml(items, today) {
  * プレーンテキストメール本文を生成（HTMLが表示できない環境向け）
  */
 function buildText(items, today) {
-  const lines = [`厚生労働省・PMDA 新着情報 ${today}`, `${items.length}件の関連情報\n`, '='.repeat(60)];
+  const lines = [
+    `厚生労働省・PMDA 新着情報 ${today}`,
+    `${items.length}件の関連情報\n`,
+    "=".repeat(60),
+  ];
 
   for (const it of items) {
-    lines.push('');
-    lines.push(`【${it.source}】${it.pubDate ? ' ' + formatDate(it.pubDate) : ''}`);
+    lines.push("");
+    lines.push(
+      `【${it.source}】${it.pubDate ? " " + formatDate(it.pubDate) : ""}`,
+    );
     lines.push(it.title);
     if (it.aiSummary) lines.push(it.aiSummary);
     lines.push(it.link);
-    lines.push('-'.repeat(40));
+    lines.push("-".repeat(40));
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function escHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function formatDate(d) {
-  if (!d) return '';
+  if (!d) return "";
   const dt = d instanceof Date ? d : new Date(d);
   if (isNaN(dt.getTime())) return String(d);
-  return `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`;
+  return `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, "0")}/${String(dt.getDate()).padStart(2, "0")}`;
 }
 
 /**
@@ -137,8 +143,8 @@ export async function sendTestEmail(config) {
   await transporter.sendMail({
     from,
     to,
-    subject: '[厚労省モニタリング] テスト送信',
-    text: 'メール設定が正常に動作しています。',
+    subject: "[厚労省モニタリング] テスト送信",
+    text: "メール設定が正常に動作しています。",
   });
-  console.log('テストメール送信成功');
+  console.log("テストメール送信成功");
 }
