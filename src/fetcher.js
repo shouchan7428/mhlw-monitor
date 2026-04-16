@@ -18,7 +18,11 @@ const parser = new XMLParser({
  */
 async function fetchFeed(source) {
   const res = await fetch(source.url, {
-    headers: { "User-Agent": "MHLWMonitor/1.0 (health-regulation-tracker)" },
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "application/rss+xml, application/rdf+xml, application/atom+xml, application/xml, text/xml, */*",
+      "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    },
     signal: AbortSignal.timeout(15000),
   });
 
